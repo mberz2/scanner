@@ -33,6 +33,8 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -132,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
 
             //Set Activity type
             String activityType = "Observe";
+            Date currentTime = Calendar.getInstance().getTime();
 
             //Set title
             builder.setTitle("Scan Result");
@@ -141,6 +144,7 @@ public class MainActivity extends AppCompatActivity {
                     "#: "+intentResult.getContents()
                     +"\nType: "+intentResult.getFormatName()
                     +"\nActivity: "+ activityType
+                    +"\nDate: "+currentTime
                     +"\n"+location_string
             );
 
