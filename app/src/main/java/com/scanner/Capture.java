@@ -1,5 +1,5 @@
 package com.scanner;
 import com.journeyapps.barcodescanner.CaptureActivity;
 
-public class Capture {
+public class Capture extends CaptureActivity {
 }

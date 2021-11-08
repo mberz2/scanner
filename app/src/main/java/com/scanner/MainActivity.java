@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
             //builder.setMessage(intentResult.getContents());
             builder.setMessage("#: "+intentResult.getContents()
                     +"\nType: "+intentResult.getFormatName()
-                    +"Activity: "+activityType);
+                    +"\nActivity: "+activityType);
 
 
             //Set positive button
