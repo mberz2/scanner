@@ -2,6 +2,7 @@ package com.scanner;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -17,6 +18,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
@@ -32,7 +34,13 @@ import com.google.android.gms.tasks.Task;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -115,7 +123,8 @@ public class MainActivity extends AppCompatActivity {
         });
         }
 
-        @SuppressLint("MissingPermission")
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @SuppressLint("MissingPermission")
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -155,20 +164,34 @@ public class MainActivity extends AppCompatActivity {
 
             //Set Activity type
             String activityType = "Observe";
-            Date currentTime = Calendar.getInstance().getTime();
 
             //Set title
             builder.setTitle("Scan Result");
 
+            List<String> epc_list = new ArrayList<>();
+            epc_list.add(epc_sgtin);
+
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("@context","https://gs1.github.io/EPCIS/epcis-context.jsonld");
+                obj.put("isA", "ObjectEvent");
+                obj.put("epcList", epc_list);
+                obj.put("action", activityType);
+                obj.put("eventTime", Instant.now().toString());
+                obj.put("eventTimeZoneOffset", ZoneId.systemDefault().getRules().getOffset(Instant.now()));
+                obj.put("bizStep", "undefined");
+
+            }  catch (JSONException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
             //Set message
-            builder.setMessage(
-                    "#: "+intentResult.getContents()
-                    +"\nSGTIN: "+epc_sgtin
-                    +"\nType: "+intentResult.getFormatName()
-                    +"\nActivity: "+ activityType
-                    +"\nDate: "+currentTime
-                    +"\n"+location_string
-            );
+            try {
+                builder.setMessage(obj.toString(2));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
 
             //Set positive button
