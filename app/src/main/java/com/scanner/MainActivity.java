@@ -21,6 +21,7 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -52,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
     Button btScan;
     FusedLocationProviderClient fusedLocationProviderClient;
     String location_string;
+    double latitude;
+    double longitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,6 +119,8 @@ public class MainActivity extends AppCompatActivity {
                             " " + addresses.get(0).getLongitude() +
                             "\nCountry: " + addresses.get(0).getCountryName() +
                             "\nLocality: " + addresses.get(0).getLocality();
+                    latitude = addresses.get(0).getLatitude();
+                    longitude = addresses.get(0).getLongitude();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -124,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    @SuppressLint("MissingPermission")
+    @SuppressLint({"MissingPermission", "HardwareIds"})
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -163,23 +168,29 @@ public class MainActivity extends AppCompatActivity {
             );
 
             //Set Activity type
-            String activityType = "Observe";
+            String type = "scanTransaction";
 
             //Set title
             builder.setTitle("Scan Result");
 
-            List<String> epc_list = new ArrayList<>();
-            epc_list.add(epc_sgtin);
+            JSONObject loc = new JSONObject();
+            try {
+                loc.put("latitude", latitude);
+                loc.put("longitude", longitude);
+
+            } catch (JSONException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
 
             JSONObject obj = new JSONObject();
             try {
-                obj.put("@context","https://gs1.github.io/EPCIS/epcis-context.jsonld");
-                obj.put("isA", "ObjectEvent");
-                obj.put("epcList", epc_list);
-                obj.put("action", activityType);
-                obj.put("eventTime", Instant.now().toString());
-                obj.put("eventTimeZoneOffset", ZoneId.systemDefault().getRules().getOffset(Instant.now()));
-                obj.put("bizStep", "undefined");
+                obj.put("symbology", intentResult.getFormatName());
+                obj.put("value", intentResult.getContents());
+                obj.put("timestamp", Instant.now().toString());
+                obj.put("location", loc);
+                obj.put("deviceId", getDeviceId(this));
+                obj.put("type", type);
 
             }  catch (JSONException e) {
                 // TODO Auto-generated catch block
@@ -192,7 +203,6 @@ public class MainActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
 
             //Set positive button
             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -212,5 +222,12 @@ public class MainActivity extends AppCompatActivity {
                     "Failed to scan.",Toast.LENGTH_SHORT)
                     .show();
         }
+    }
+
+    @SuppressLint("HardwareIds")
+    public static String getDeviceId(Context context) {
+
+        return Settings.Secure.getString(
+                context.getContentResolver(), Settings.Secure.ANDROID_ID);
     }
 }
