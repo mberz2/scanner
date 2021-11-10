@@ -136,12 +136,11 @@ public class MainActivity extends AppCompatActivity {
                 String ref;
                 String indic = "0";
 
-                String gtin = indic+intentResult.getContents().substring(0,6);
-
                 prefix = "0"+intentResult.getContents().substring(0,6);
                 ref = intentResult.getContents().substring(6,11);
 
-                //Arbitrary assignment;
+                //Arbitrary assignment
+                //Will need to account for serialization
                 String serial = "0001";
 
                 epc_sgtin = "urn:epc:id:sgtin:"+prefix+"."+indic+ref+"."+serial;
