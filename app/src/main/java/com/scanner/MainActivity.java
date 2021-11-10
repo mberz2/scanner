@@ -126,6 +126,28 @@ public class MainActivity extends AppCompatActivity {
 
         //Check condition
         if(intentResult.getContents() != null){
+
+            String epc_sgtin = null;
+
+            //Convert EPC to SGTIN
+            if(intentResult.getFormatName().equals("UPC_A")){
+
+                String prefix;
+                String ref;
+                String indic = "0";
+
+                String gtin = indic+intentResult.getContents().substring(0,6);
+
+                prefix = "0"+intentResult.getContents().substring(0,6);
+                ref = intentResult.getContents().substring(6,11);
+
+                //Arbitrary assignment;
+                String serial = "0001";
+
+                epc_sgtin = "urn:epc:id:sgtin:"+prefix+"."+indic+ref+"."+serial;
+            }
+
+
             //When result content is not null
             //Initialize alert dialog
             AlertDialog.Builder builder = new AlertDialog.Builder(
@@ -142,6 +164,7 @@ public class MainActivity extends AppCompatActivity {
             //Set message
             builder.setMessage(
                     "#: "+intentResult.getContents()
+                    +"\nSGTIN: "+epc_sgtin
                     +"\nType: "+intentResult.getFormatName()
                     +"\nActivity: "+ activityType
                     +"\nDate: "+currentTime
